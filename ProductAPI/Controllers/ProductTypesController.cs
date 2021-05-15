@@ -10,7 +10,7 @@ using ProductAPI.Models;
 
 namespace ProductAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("/product_types")]
     [ApiController]
     public class ProductTypesController : ControllerBase
     {
@@ -21,18 +21,24 @@ namespace ProductAPI.Controllers
             _context = context;
         }
 
-        // GET: api/ProductTypes
+        // GET: /product_types
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductType>>> GetProductTypes()
+        public async Task<ActionResult<IEnumerable<ProductTypeDTO>>> GetProductTypes()
         {
-            return await _context.ProductTypes.ToListAsync();
+            var productTypes = await _context.ProductTypes.ToListAsync();
+            var productTypesDTO = new List<ProductTypeDTO>();
+            foreach(ProductType productType in productTypes)
+            {
+                productTypesDTO.Add(ProductTypeToDTO(productType));
+            }
+            return productTypesDTO;
         }
 
-        // GET: api/ProductTypes/5
+        // GET: /product_types/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductType>> GetProductType(int id)
+        public async Task<ActionResult<ProductTypeDTO>> GetProductType(int id)
         {
-            var productType = await _context.ProductTypes.FindAsync(id);
+            var productType = ProductTypeToDTO(await _context.ProductTypes.FindAsync(id));
 
             if (productType == null)
             {
@@ -42,17 +48,14 @@ namespace ProductAPI.Controllers
             return productType;
         }
 
-        // PUT: api/ProductTypes/5
+        // PUT: /product_types/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProductType(int id, ProductType productType)
+        public async Task<IActionResult> PutProductType(int id, ProductTypeDTO productType)
         {
-            if (id != productType.id)
-            {
-                return BadRequest();
-            }
+            productType.Id = id;
 
-            _context.Entry(productType).State = EntityState.Modified;
+            _context.Entry(DTOToProductType(productType)).State = EntityState.Modified;
 
             try
             {
@@ -73,28 +76,28 @@ namespace ProductAPI.Controllers
             return NoContent();
         }
 
-        // POST: api/ProductTypes
+        // POST: /product_types
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ProductType>> PostProductType(ProductType productType)
+        public async Task<ActionResult<ProductTypeDTO>> PostProductType(ProductTypeDTO productType)
         {
-            _context.ProductTypes.Add(productType);
+            _context.ProductTypes.Add(DTOToProductType(productType));
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProductType", new { id = productType.id }, productType);
+            return CreatedAtAction("GetProductType", new { }, productType);
         }
 
-        // DELETE: api/ProductTypes/5
+        // DELETE: /product_types
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProductType(int id)
         {
-            var productType = await _context.ProductTypes.FindAsync(id);
+            var productType = ProductTypeToDTO(await _context.ProductTypes.FindAsync(id));
             if (productType == null)
             {
                 return NotFound();
             }
 
-            _context.ProductTypes.Remove(productType);
+            _context.ProductTypes.Remove(DTOToProductType(productType));
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -103,6 +106,26 @@ namespace ProductAPI.Controllers
         private bool ProductTypeExists(int id)
         {
             return _context.ProductTypes.Any(e => e.id == id);
+        }
+
+        public ProductType DTOToProductType(ProductTypeDTO productType)
+        {
+            return new ProductType()
+            {
+                id = productType.Id,
+                name = productType.Name,
+                canBeInsured = productType.canBeInsured
+            };
+        }
+
+        public ProductTypeDTO ProductTypeToDTO(ProductType productType)
+        {
+            return new ProductTypeDTO()
+            {
+                Id = productType.id,
+                Name = productType.name,
+                canBeInsured = productType.canBeInsured
+            };
         }
     }
 }

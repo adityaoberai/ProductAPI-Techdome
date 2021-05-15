@@ -16,27 +16,5 @@ namespace ProductAPI.Models
         public double salesPrice { get; set; }
         [JsonPropertyName("productTypeId")]
         public Int32 productTypeId { get; set; }
-
-        public Product DTOToProduct(ProductDTO product)
-        {
-            return new Product()
-            {
-                id = product.Id,
-                name = product.Name,
-                salesPrice = product.salesPrice,
-                productTypeId = product.productTypeId
-            };
-        }
-
-        public ProductDTO ProductToDTO(Product product)
-        {
-            return new ProductDTO()
-            {
-                Id = product.id,
-                Name = product.name,
-                salesPrice = product.salesPrice,
-                productTypeId = product.productTypeId
-            };
-        }
     }
 }
