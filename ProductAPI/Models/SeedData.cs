@@ -53,6 +53,13 @@ namespace ProductAPI.Models
                         name = "Alienware Area 51 M15X",
                         salesPrice = 4000,
                         productTypeId = 2
+                    },
+
+                    new Product
+                    {
+                        name = "Sony DSLR",
+                        salesPrice = 400,
+                        productTypeId = 4
                     }
                 );
                 productContext.SaveChanges();
@@ -75,8 +82,13 @@ namespace ProductAPI.Models
 
                     new ProductType
                     {
-                        id = 3,
                         name = "display",
+                        canBeInsured = true
+                    },
+
+                    new ProductType
+                    {
+                        name = "digital camera",
                         canBeInsured = true
                     }
                 );

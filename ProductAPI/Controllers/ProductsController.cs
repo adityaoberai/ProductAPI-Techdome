@@ -10,7 +10,7 @@ using ProductAPI.Models;
 
 namespace ProductAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("/products")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -21,18 +21,18 @@ namespace ProductAPI.Controllers
             _context = context;
         }
 
-        // GET: api/Products
+        // GET: /products
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
             return await _context.Products.ToListAsync();
         }
 
-        // GET: api/Products/5
+        // GET: /products/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult<ProductDTO>> GetProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = ProductToDTO(await _context.Products.FindAsync(id));
 
             if (product == null)
             {
@@ -45,14 +45,11 @@ namespace ProductAPI.Controllers
         // PUT: api/Products/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, Product product)
+        public async Task<IActionResult> PutProduct(int id, ProductDTO product)
         {
-            if (id != product.id)
-            {
-                return BadRequest();
-            }
+            product.Id=id;
 
-            _context.Entry(product).State = EntityState.Modified;
+            _context.Entry(DTOToProduct(product)).State = EntityState.Modified;
 
             try
             {
@@ -73,18 +70,18 @@ namespace ProductAPI.Controllers
             return NoContent();
         }
 
-        // POST: api/Products
+        // POST: /products
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct(Product product)
+        public async Task<ActionResult<ProductDTO>> PostProduct(ProductDTO product)
         {
-            _context.Products.Add(product);
+            _context.Products.Add(DTOToProduct(product));
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProduct", new { id = product.id }, product);
+            return CreatedAtAction("GetProduct", new { id = product.Id }, product);
         }
 
-        // DELETE: api/Products/5
+        // DELETE: /products/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
@@ -103,6 +100,28 @@ namespace ProductAPI.Controllers
         private bool ProductExists(int id)
         {
             return _context.Products.Any(e => e.id == id);
+        }
+
+        public Product DTOToProduct(ProductDTO product)
+        {
+            return new Product()
+            {
+                id = product.Id,
+                name = product.Name,
+                salesPrice = product.salesPrice,
+                productTypeId = product.productTypeId
+            };
+        }
+
+        public ProductDTO ProductToDTO(Product product)
+        {
+            return new ProductDTO()
+            {
+                Id = product.id,
+                Name = product.name,
+                salesPrice = product.salesPrice,
+                productTypeId = product.productTypeId
+            };
         }
     }
 }
